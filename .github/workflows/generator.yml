@@ -133,7 +133,7 @@ jobs:
         run: |
           git tag ${P} -m "${P}-node_modules-yarn.tar.xz"
           cd "input/${WORKDIR}"
-          yarn install
+          yarn install --ignore-scripts
           tar --create --auto-compress --file /tmp/${P}-node_modules-yarn.tar.xz node_modules
           rm -rf node_modules
 
