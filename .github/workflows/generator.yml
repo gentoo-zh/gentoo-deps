@@ -124,6 +124,18 @@ jobs:
           tar --create --auto-compress --file /tmp/${P}-node_modules-pnpm.tar.xz node_modules
           rm -rf node_modules
 
+      - name: Generate javascript(yarn) node_modules
+        if: inputs.LANG == 'javascript(yarn)'
+        env:
+          P: ${{ inputs.P }}
+          WORKDIR: ${{ inputs.WORKDIR }}
+        run: |
+          git tag ${P} -m "${P}-node_modules-yarn.tar.xz"
+          cd "input/${WORKDIR}"
+          yarn install
+          tar --create --auto-compress --file /tmp/${P}-node_modules-yarn.tar.xz node_modules
+          rm -rf node_modules
+
       - name: Generate rust crates
         if: inputs.LANG == 'rust'
         env:
@@ -173,6 +185,14 @@ jobs:
         with:
           files: |
             /tmp/${{ inputs.P }}-node_modules-pnpm.tar.xz
+          tag_name: ${{ inputs.P }}
+
+      - name: upload javascript(yarn) node_modules to release artifaces
+        if: inputs.LANG == 'javascript(yarn)'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            /tmp/${{ inputs.P }}-node_modules-yarn.tar.xz
           tag_name: ${{ inputs.P }}
 
       - name: upload rust crates to release artifaces
