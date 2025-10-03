@@ -14,6 +14,7 @@ on:
         - golang
         - javascript
         - javascript(pnpm)
+        - javascript(yarn)
         - rust
 
       REPO:
