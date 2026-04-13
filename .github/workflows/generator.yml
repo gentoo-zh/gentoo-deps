@@ -164,7 +164,7 @@ jobs:
 
       - name: upload golang deps to release artifaces
         if: inputs.LANG == 'golang'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             /tmp/${{ inputs.P }}-deps.tar.xz
@@ -172,7 +172,7 @@ jobs:
 
       - name: upload golang vendor to release artifaces
         if: inputs.LANG == 'golang' && inputs.VENDORDIR != ''
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             /tmp/${{ inputs.P }}-vendor.tar.xz
@@ -180,7 +180,7 @@ jobs:
 
       - name: upload javascript node_modules to release artifaces
         if: inputs.LANG == 'javascript'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             /tmp/${{ inputs.P }}-node_modules.tar.xz
@@ -188,7 +188,7 @@ jobs:
 
       - name: upload javascript(pnpm) node_modules to release artifaces
         if: inputs.LANG == 'javascript(pnpm)'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             /tmp/${{ inputs.P }}-node_modules-pnpm.tar.xz
@@ -196,7 +196,7 @@ jobs:
 
       - name: upload rust crates to release artifaces
         if: inputs.LANG == 'rust'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             /tmp/*-crates.tar.xz
@@ -205,7 +205,7 @@ jobs:
 
       - name: upload rust crates to release artifaces
         if: inputs.LANG == 'dart'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             /tmp/*-pubcache.tar.xz
