@@ -54,6 +54,7 @@ jobs:
           repository: ${{ inputs.REPO }}
           ref: ${{ inputs.TAG }}
           fetch-depth: 0
+          submodules: true
           path: "input"
 
       - name: delete old tag
