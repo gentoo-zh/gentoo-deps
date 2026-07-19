@@ -83,8 +83,11 @@ jobs:
         run: |
           git tag ${P} -m "${P}-deps.tar.xz ${P}-vendor.tar.xz"
           cd "input/${WORKDIR}"
+          export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
+          # reproducible tar: fixed mtime/order/owner so the same tag yields byte-identical bytes
+          rtar() { tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner "$@"; }
           GOMODCACHE="${PWD}"/go-mod go mod download -modcacherw
-          tar --create --auto-compress --file /tmp/${P}-deps.tar.xz go-mod
+          rtar --file /tmp/${P}-deps.tar.xz go-mod
           if [[ x"${VENDORDIR}" != x"" ]]; then
             rm -rf go-mod
             if [[ -f go.work ]]; then
@@ -92,7 +95,7 @@ jobs:
             else
               go mod vendor -modcacherw -o ${VENDORDIR}/vendor
             fi
-            tar --create --auto-compress --file /tmp/${P}-vendor.tar.xz ${VENDORDIR}/vendor
+            rtar --file /tmp/${P}-vendor.tar.xz ${VENDORDIR}/vendor
           fi
 
       - name: Generate javascript node_modules
@@ -103,8 +106,10 @@ jobs:
         run: |
           git tag ${P} -m "${P}-node_modules.tar.xz"
           cd "input/${WORKDIR}"
+          export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
           npm install --legacy-peer-deps --cache "${PWD}"/npm-cache
-          tar --create --auto-compress --file /tmp/${P}-node_modules.tar.xz node_modules
+          tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner \
+            --file /tmp/${P}-node_modules.tar.xz node_modules
           rm -rf node_modules
 
       - name: Setup pnpm
@@ -119,10 +124,12 @@ jobs:
           P: ${{ inputs.P }}
           WORKDIR: ${{ inputs.WORKDIR }}
         run: |
-          git tag ${P} -m "${P}-node_modules-pnpm.tar.xz"
+          git tag ${P} -m "${P}-node_modules.tar.xz"
           cd "input/${WORKDIR}"
+          export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
           pnpm install
-          tar --create --auto-compress --file /tmp/${P}-node_modules-pnpm.tar.xz node_modules
+          tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner \
+            --file /tmp/${P}-node_modules.tar.xz node_modules
           rm -rf node_modules
 
       - name: Generate rust crates
@@ -150,11 +157,13 @@ jobs:
           WORKDIR: ${{ inputs.WORKDIR }}
           PUB_CACHE: ${{ inputs.P }}/pubcache
         run: |
-          git tag ${P} -m "${P}-dart.tar.xz"
+          git tag ${P} -m "${P}-pubcache.tar.xz"
           cd "input/${WORKDIR}"
+          export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
           dart --disable-analytics
           dart pub get
-          tar --create --auto-compress --file /tmp/${P}-pubcache.tar.xz ${{ inputs.P }}
+          tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner \
+            --file /tmp/${P}-pubcache.tar.xz ${{ inputs.P }}
 
       - name: push tag
         uses: ad-m/github-push-action@master
@@ -192,7 +201,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           files: |
-            /tmp/${{ inputs.P }}-node_modules-pnpm.tar.xz
+            /tmp/${{ inputs.P }}-node_modules.tar.xz
           tag_name: ${{ inputs.P }}
 
       - name: upload rust crates to release artifaces
