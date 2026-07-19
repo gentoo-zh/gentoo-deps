@@ -83,6 +83,9 @@ jobs:
         run: |
           git tag ${P} -m "${P}-deps.tar.xz ${P}-vendor.tar.xz"
           cd "input/${WORKDIR}"
+          # if this module is not itself a workspace root, ignore a parent go.work (else `go mod
+          # download`/`vendor` refuse to run in workspace mode)
+          [[ -f go.work ]] || export GOWORK=off
           export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
           # reproducible tar: fixed mtime/order/owner so the same tag yields byte-identical bytes
           rtar() { tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner "$@"; }
@@ -142,7 +145,13 @@ jobs:
           pip install pycargoebuild
           wget https://raw.githubusercontent.com/gentoo/gentoo/refs/heads/master/metadata/license-mapping.conf -O /tmp/license-mapping.conf
           cd "input/${WORKDIR}"
-          pycargoebuild --crate-tarball --distdir /tmp/ --license-mapping /tmp/license-mapping.conf
+          # a virtual workspace root has only [workspace], no [package]; pycargoebuild must run in a
+          # member (it still gathers the whole workspace's crates). Pin the output name to ${P}.
+          if ! grep -q '^\[package\]' Cargo.toml && grep -q '^\[workspace\]' Cargo.toml; then
+            cd "$(cargo metadata --no-deps --format-version 1 | jq -r '.packages[0].manifest_path | rtrimstr("/Cargo.toml")')"
+          fi
+          pycargoebuild --crate-tarball --crate-tarball-path "/tmp/${P}-crates.tar.xz" \
+            --distdir /tmp/ --license-mapping /tmp/license-mapping.conf
 
       - name: Setup dart
         if: inputs.LANG == 'dart'
