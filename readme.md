@@ -1,4 +1,7 @@
-You can use this workflow generate gentoo deps tarball
+You can use this workflow to generate Gentoo dependency tarballs manually.
+
+For automated builds, [crate-dist-mirror-action](https://github.com/projg2/crate-dist-mirror-action) and [golang-dist-mirror-action](https://github.com/projg2/golang-dist-mirror-action) are recommended.
+
 
 Support:
 
