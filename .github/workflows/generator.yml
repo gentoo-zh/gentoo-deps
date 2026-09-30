@@ -1,4 +1,5 @@
 name: "Generator"
+run-name: ${{ inputs.P }} ${{ inputs.TAG }}
 on:
   workflow_dispatch:
     inputs:
