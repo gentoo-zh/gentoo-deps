@@ -183,12 +183,11 @@ jobs:
           tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner \
             --file /tmp/${P}-pubcache.tar.xz ${{ inputs.P }}
 
+      # push the tag alone: pushing HEAD would move master to the dispatched branch
       - name: push tag
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          force: true
-          tags: true
+        env:
+          P: ${{ inputs.P }}
+        run: git push --force origin "refs/tags/${P}"
 
       - name: upload golang deps to release artifaces
         if: inputs.LANG == 'golang'
