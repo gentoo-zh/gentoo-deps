@@ -112,6 +112,7 @@ jobs:
           cd "input/${WORKDIR}"
           export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
           npm install --legacy-peer-deps --cache "${PWD}"/npm-cache
+          node "${GITHUB_WORKSPACE}"/scripts/npm-add-arm64.js
           tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner \
             --file /tmp/${P}-node_modules.tar.xz node_modules
           rm -rf node_modules
@@ -133,6 +134,11 @@ jobs:
           export LC_ALL=C TZ=UTC XZ_OPT="-T0 -9e"
           # pnpm 11 blocks dependency build scripts by default (strictDepBuilds); the vendored
           # node_modules needs them (esbuild etc.), so allow them non-interactively.
+          # pnpm also installs only the runner's native packages; add linux arm64 unless
+          # upstream already set the platforms.
+          if ! grep -qs '^supportedArchitectures:' pnpm-workspace.yaml; then
+            printf '\nsupportedArchitectures:\n  os: [current, linux]\n  cpu: [current, arm64]\n  libc: [current, glibc]\n' >> pnpm-workspace.yaml
+          fi
           pnpm install --config.dangerouslyAllowAllBuilds=true
           tar --create --auto-compress --mtime=@0 --sort=name --owner=0 --group=0 --numeric-owner \
             --file /tmp/${P}-node_modules.tar.xz node_modules
